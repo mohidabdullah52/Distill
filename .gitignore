@@ -9,6 +9,9 @@ __pycache__/
 
 # Chroma / app data
 data/
+backend/chroma_db/
+backend/uploads/
+backend/outputs/
 
 # Node
 frontend/node_modules/
@@ -16,7 +19,8 @@ frontend/dist/
 
 # Environment
 .env
-.env.*
+backend/.env
+cursorrules.md
 
 # OS / IDE
 .DS_Store

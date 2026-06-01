@@ -1,75 +1,125 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
-  Alert,
   Box,
-  CircularProgress,
+  Button,
   Container,
   CssBaseline,
+  Divider,
   Paper,
+  TextField,
   ThemeProvider,
   Typography,
-  createTheme,
 } from '@mui/material'
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
+import theme from './theme'
+import DropZone from './components/DropZone'
+import FileList from './components/FileList'
+import ProcessingStatus from './components/ProcessingStatus'
+import ResultCard from './components/ResultCard'
+import ErrorAlert from './components/ErrorAlert'
+import { useDocumentPipeline } from './hooks/useDocumentPipeline'
 
-const theme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: { main: '#1976d2' },
-  },
-})
+export default function App() {
+  const { state, STEPS, addFiles, removeFile, run, reset, dismissError } =
+    useDocumentPipeline()
+  const [focusPrompt, setFocusPrompt] = useState('')
 
-type Health = {
-  status: string
-  chroma_collection: string
-  document_count: number
-}
-
-function App() {
-  const [health, setHealth] = useState<Health | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetch('/api/health')
-      .then((res) => {
-        if (!res.ok) throw new Error(`API returned ${res.status}`)
-        return res.json() as Promise<Health>
-      })
-      .then(setHealth)
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setLoading(false))
-  }, [])
+  const isProcessing = ['uploading', 'ingesting', 'summarizing'].includes(
+    state.status,
+  )
+  const isDone = state.status === 'done'
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Container maxWidth="sm">
-        <Box sx={{ py: 8 }}>
-          <Typography variant="h3" component="h1" gutterBottom>
-            Summarag
-          </Typography>
-          <Typography color="text.secondary" sx={{ mb: 2 }}>
-            RAG stack: FastAPI, ChromaDB, React, and Material UI.
-          </Typography>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          bgcolor: 'background.default',
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'center',
+          pt: 6,
+          pb: 8,
+        }}
+      >
+        <Container maxWidth="sm">
+          <Box sx={{ textAlign: 'center', mb: 4 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 1,
+                mb: 1,
+              }}
+            >
+              <AutoAwesomeIcon color="primary" sx={{ fontSize: 32 }} />
+              <Typography variant="h4" color="primary.dark">
+                Distill
+              </Typography>
+            </Box>
+            <Typography variant="body1" color="text.secondary">
+              Upload PDFs or PowerPoints — get a compact, AI-generated summary PDF
+            </Typography>
+          </Box>
 
-          <Paper sx={{ p: 3, mt: 2 }}>
-            {loading && (
-              <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-                <CircularProgress size={32} />
-              </Box>
+          <Paper elevation={1} sx={{ p: 4, borderRadius: 3 }}>
+            <DropZone onFilesAdded={addFiles} disabled={isProcessing || isDone} />
+            <FileList
+              files={state.files}
+              onRemove={removeFile}
+              disabled={isProcessing}
+            />
+
+            {state.files.length > 0 && !isDone && (
+              <>
+                <Divider sx={{ my: 3 }} />
+                <TextField
+                  fullWidth
+                  label="Focus area (optional)"
+                  placeholder="e.g. financial projections, technical architecture, risks..."
+                  value={focusPrompt}
+                  onChange={(e) => setFocusPrompt(e.target.value)}
+                  disabled={isProcessing}
+                  size="small"
+                  helperText="Guide the AI to emphasize specific topics"
+                  sx={{ mb: 2 }}
+                />
+                <Button
+                  variant="contained"
+                  fullWidth
+                  size="large"
+                  onClick={() => run(focusPrompt)}
+                  disabled={isProcessing || state.files.length === 0}
+                >
+                  {isProcessing ? 'Processing…' : 'Generate Summary PDF'}
+                </Button>
+              </>
             )}
-            {error && <Alert severity="error">Backend unreachable: {error}</Alert>}
-            {health && (
-              <Alert severity="success">
-                API is healthy. Chroma collection &quot;{health.chroma_collection}&quot; has{' '}
-                {health.document_count} document(s).
-              </Alert>
+
+            {(isProcessing || isDone) && (
+              <ProcessingStatus
+                activeStep={state.activeStep}
+                steps={STEPS}
+                status={state.status}
+                totalChunks={state.totalChunks}
+              />
             )}
+
+            <ErrorAlert message={state.error} onDismiss={dismissError} />
           </Paper>
-        </Box>
-      </Container>
+
+          {isDone && (
+            <ResultCard
+              downloadUrl={state.downloadUrl}
+              pdfFilename={state.pdfFilename}
+              summaryPreview={state.summaryPreview}
+              onReset={reset}
+            />
+          )}
+        </Container>
+      </Box>
     </ThemeProvider>
   )
 }
-
-export default App

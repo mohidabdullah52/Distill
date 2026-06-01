@@ -1,40 +1,49 @@
+"""FastAPI application entry point."""
+
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 
-from app.chroma_store import get_chroma_client, get_collection
+from app.config import settings
+from app.routes.ingest import router as ingest_router
+from app.routes.summarize import router as summarize_router
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    get_chroma_client()
+    """Ensure upload, output, and Chroma directories exist at startup."""
+    settings.upload_path().mkdir(parents=True, exist_ok=True)
+    settings.output_path().mkdir(parents=True, exist_ok=True)
+    settings.chroma_path().mkdir(parents=True, exist_ok=True)
     yield
 
 
-app = FastAPI(title="Summarag API", lifespan=lifespan)
+app = FastAPI(
+    title="RAG Document Summarizer",
+    version="1.0.0",
+    description="Ingest PDFs and PPTXs, get a concise summary PDF back.",
+    lifespan=lifespan,
+)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
-class HealthResponse(BaseModel):
-    status: str
-    chroma_collection: str
-    document_count: int
+app.include_router(ingest_router, prefix="/api")
+app.include_router(summarize_router, prefix="/api")
 
 
-@app.get("/api/health", response_model=HealthResponse)
-def health() -> HealthResponse:
-    collection = get_collection()
-    return HealthResponse(
-        status="ok",
-        chroma_collection=collection.name,
-        document_count=collection.count(),
-    )
+@app.get("/health")
+def health() -> dict[str, str]:
+    """Health check endpoint."""
+    return {"status": "ok"}
