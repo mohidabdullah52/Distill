@@ -2,6 +2,7 @@
 Tests for text chunking.
 """
 
+import pytest
 from app.services.chunker import chunk_pages
 
 
@@ -32,3 +33,12 @@ def test_chunk_pages_empty_input() -> None:
         None
     """
     assert chunk_pages([]) == []
+
+
+def test_chunk_pages_overlap_validation() -> None:
+    """
+    Verifies that passing chunk_overlap >= chunk_size raises a ValueError.
+    """
+    with pytest.raises(ValueError, match="chunk_overlap must be less than chunk_size"):
+        chunk_pages([("report.pdf", 1, "test text")], chunk_size=10, chunk_overlap=10)
+

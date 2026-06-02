@@ -4,7 +4,7 @@ Loads application settings from environment variables and resolves storage paths
 
 from pathlib import Path
 
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _BACKEND_ROOT = Path(__file__).resolve().parents[1]
@@ -63,6 +63,15 @@ class Settings(BaseSettings):
             str: Lowercase, trimmed provider name.
         """
         return value.strip().lower()
+
+    @model_validator(mode="after")
+    def validate_overlap(self) -> "Settings":
+        """
+        Validates that chunk overlap is strictly less than chunk size.
+        """
+        if self.chunk_overlap >= self.chunk_size:
+            raise ValueError("chunk_overlap must be less than chunk_size")
+        return self
 
     def chroma_path(self) -> Path:
         """

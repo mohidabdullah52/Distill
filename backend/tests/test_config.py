@@ -112,3 +112,15 @@ def test_invalid_provider_raises() -> None:
 
     with pytest.raises(ValueError, match="Unsupported LLM_PROVIDER"):
         resolve_llm_config(cfg)
+
+
+def test_chunk_size_overlap_validation() -> None:
+    """
+    Verifies that chunk_overlap >= chunk_size is rejected during Settings initialization.
+    """
+    with pytest.raises(ValueError, match="chunk_overlap must be less than chunk_size"):
+        Settings(chunk_size=100, chunk_overlap=100)
+
+    with pytest.raises(ValueError, match="chunk_overlap must be less than chunk_size"):
+        Settings(chunk_size=100, chunk_overlap=120)
+

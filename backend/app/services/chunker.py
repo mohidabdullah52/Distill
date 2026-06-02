@@ -27,6 +27,9 @@ def chunk_pages(
     size = chunk_size or settings.chunk_size
     overlap = chunk_overlap or settings.chunk_overlap
 
+    if overlap >= size:
+        raise ValueError("chunk_overlap must be less than chunk_size")
+
     chunks: List[Dict[str, Any]] = []
     chunk_id = 0
 
