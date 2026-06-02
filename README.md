@@ -84,6 +84,7 @@ Open http://localhost:5173 — the UI shows API/LLM status in the header, suppor
 | POST | `/api/ingest` | Upload and index documents |
 | POST | `/api/summarize` | Generate summary PDF |
 | GET | `/api/download/{filename}` | Download generated PDF |
+| POST | `/api/cleanup/{session_id}` | Purge uploaded files, generated PDFs, and ChromaDB collection |
 
 ## Tests
 
