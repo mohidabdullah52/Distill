@@ -1,4 +1,6 @@
-"""LLM summary generation via OpenAI-compatible APIs (ChatGPT, Gemini, Ollama)."""
+"""
+Calls the configured language model to produce a structured document summary.
+"""
 
 from typing import List
 
@@ -37,12 +39,25 @@ Rules:
 
 
 def _client_key(config: ResolvedLLMConfig) -> tuple[str, str, str]:
-    """Build a cache key for the OpenAI client singleton."""
+    """
+    Builds a cache key so the HTTP client can be reused across requests.
+
+    Args:
+        config (ResolvedLLMConfig): Active provider connection details.
+
+    Returns:
+        tuple[str, str, str]: Base URL, API key, and provider name.
+    """
     return (config.base_url, config.api_key, config.provider)
 
 
 def _get_client() -> OpenAI:
-    """Return a singleton OpenAI-compatible client for the active LLM provider."""
+    """
+    Returns a shared OpenAI-compatible client for the active LLM provider.
+
+    Returns:
+        OpenAI: Client configured for the current provider and credentials.
+    """
     global _client, _client_signature
 
     validate_llm_config()
@@ -61,10 +76,10 @@ def _get_client() -> OpenAI:
 
 def get_active_llm_info() -> dict[str, str]:
     """
-    Return non-secret metadata about the configured LLM (for health/debug).
+    Exposes safe metadata about the configured model for health checks.
 
     Returns:
-        Dict with provider and model name.
+        dict[str, str]: Provider name and model id without secrets.
     """
     config = resolve_llm_config()
     return {"provider": config.provider, "model": config.model}
@@ -72,17 +87,17 @@ def get_active_llm_info() -> dict[str, str]:
 
 def generate_summary(chunks: List[str], focus_prompt: str | None = None) -> str:
     """
-    Generate a structured markdown summary from retrieved chunks.
+    Sends retrieved chunks to the LLM and returns a markdown summary.
 
     Args:
-        chunks: Retrieved document excerpts.
-        focus_prompt: Optional user emphasis for the summary.
+        chunks (List[str]): Text excerpts retrieved from the vector store.
+        focus_prompt (str | None): Optional topic the user wants emphasized.
 
     Returns:
-        Markdown-formatted summary text.
+        str: Markdown summary produced by the language model.
 
     Raises:
-        ValueError: If LLM credentials are not configured.
+        ValueError: If credentials are missing or the model returns empty text.
     """
     validate_llm_config()
     config = resolve_llm_config()

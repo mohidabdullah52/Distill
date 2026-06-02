@@ -1,7 +1,11 @@
 import { Box } from '@mui/material'
 import { alpha } from '@mui/material/styles'
 
-/** Animated gradient mesh behind the application shell. */
+/**
+ * Renders the animated gradient background behind the application.
+ *
+ * @returns {JSX.Element} Fixed decorative background layer.
+ */
 export default function AppBackground() {
   return (
     <Box

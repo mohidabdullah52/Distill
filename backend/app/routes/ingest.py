@@ -1,6 +1,7 @@
-"""Document upload and ingestion routes."""
+"""
+Handles multipart uploads and indexes parsed documents into ChromaDB.
+"""
 
-import shutil
 import uuid
 from pathlib import Path
 
@@ -20,10 +21,16 @@ ALLOWED_EXTENSIONS = {".pdf", ".pptx", ".ppt"}
 @router.post("/ingest", response_model=IngestResponse)
 async def ingest_files(files: list[UploadFile] = File(...)) -> IngestResponse:
     """
-    Accept PDF/PPTX uploads, parse, chunk, and index into ChromaDB.
+    Accepts uploads, extracts text, chunks it, and stores vectors for the session.
+
+    Args:
+        files (list[UploadFile]): One or more PDF or PPTX files from the client.
 
     Returns:
-        IngestResponse with session_id and chunk counts.
+        IngestResponse: Session id, processed filenames, and chunk count.
+
+    Raises:
+        HTTPException: For validation, size, parse, or empty-content failures.
     """
     if not files:
         raise HTTPException(status_code=400, detail="No files provided")

@@ -1,4 +1,6 @@
-"""ChromaDB persistence and vector search with sentence-transformers."""
+"""
+Stores document chunks in ChromaDB and runs similarity search per session.
+"""
 
 from typing import Any, Dict, List
 
@@ -12,7 +14,12 @@ _client: ClientAPI | None = None
 
 
 def _get_client() -> ClientAPI:
-    """Return a singleton persistent ChromaDB client."""
+    """
+    Returns a shared persistent ChromaDB client for the application.
+
+    Returns:
+        ClientAPI: Initialized Chroma client bound to the configured data path.
+    """
     global _client
     if _client is None:
         path = settings.chroma_path()
@@ -22,12 +29,25 @@ def _get_client() -> ClientAPI:
 
 
 def _collection_name(session_id: str) -> str:
-    """Build a valid Chroma collection name for a session."""
+    """
+    Builds a Chroma-safe collection name for a user session.
+
+    Args:
+        session_id (str): Session identifier from ingest.
+
+    Returns:
+        str: Collection name scoped to that session.
+    """
     return f"session-{session_id.replace('_', '-')}"
 
 
 def _get_embedding_function():
-    """Return the sentence-transformers embedding function."""
+    """
+    Creates the sentence-transformers embedding function used by Chroma.
+
+    Returns:
+        SentenceTransformerEmbeddingFunction: Embedding function for upsert and query.
+    """
     return embedding_functions.SentenceTransformerEmbeddingFunction(
         model_name="all-MiniLM-L6-v2",
     )
@@ -35,10 +55,14 @@ def _get_embedding_function():
 
 def upsert_chunks(session_id: str, chunks: List[Dict[str, Any]]) -> int:
     """
-    Insert or update chunks in a session-scoped ChromaDB collection.
+    Writes or updates document chunks in the session vector collection.
+
+    Args:
+        session_id (str): Session identifier from ingest.
+        chunks (List[Dict[str, Any]]): Chunk dicts with id, text, and metadata.
 
     Returns:
-        Number of chunks upserted.
+        int: Number of chunks stored.
     """
     client = _get_client()
     ef = _get_embedding_function()
@@ -56,10 +80,15 @@ def upsert_chunks(session_id: str, chunks: List[Dict[str, Any]]) -> int:
 
 def query_chunks(session_id: str, query_text: str, top_k: int | None = None) -> List[str]:
     """
-    Query the session collection for the most relevant chunk texts.
+    Finds the most relevant chunk texts for a natural-language query.
+
+    Args:
+        session_id (str): Session identifier from ingest.
+        query_text (str): Search phrase used for similarity ranking.
+        top_k (int | None): Maximum chunks to return. Uses settings when omitted.
 
     Returns:
-        Flat list of document strings.
+        List[str]: Matching chunk bodies ordered by relevance.
     """
     k = top_k or settings.top_k_chunks
     client = _get_client()
@@ -74,10 +103,13 @@ def query_chunks(session_id: str, query_text: str, top_k: int | None = None) -> 
 
 def get_source_files(session_id: str) -> List[str]:
     """
-    Return unique source filenames stored in session metadata.
+    Lists unique source filenames referenced in a session collection.
+
+    Args:
+        session_id (str): Session identifier from ingest.
 
     Returns:
-        Sorted list of source file names.
+        List[str]: Sorted filenames found in chunk metadata.
     """
     client = _get_client()
     ef = _get_embedding_function()
@@ -95,7 +127,15 @@ def get_source_files(session_id: str) -> List[str]:
 
 
 def delete_session(session_id: str) -> None:
-    """Best-effort deletion of a session collection."""
+    """
+    Removes a session collection from Chroma when cleanup is requested.
+
+    Args:
+        session_id (str): Session identifier to delete.
+
+    Returns:
+        None
+    """
     try:
         client = _get_client()
         client.delete_collection(_collection_name(session_id))

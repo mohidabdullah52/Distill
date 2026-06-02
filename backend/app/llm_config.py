@@ -1,4 +1,6 @@
-"""LLM provider resolution and validation (patchable in tests)."""
+"""
+Resolves and validates LLM provider settings for ChatGPT, Gemini, and Ollama.
+"""
 
 from dataclasses import dataclass
 from typing import Literal
@@ -14,7 +16,15 @@ OLLAMA_DEFAULT_BASE_URL = "http://localhost:11434/v1"
 
 @dataclass(frozen=True)
 class ResolvedLLMConfig:
-    """Resolved LLM connection settings for the active provider."""
+    """
+    Connection details needed to call the active language model.
+
+    Attributes:
+        provider (str): Provider key, such as openai or gemini.
+        base_url (str): OpenAI-compatible API base URL.
+        api_key (str): Credential sent with each request.
+        model (str): Model identifier used for chat completions.
+    """
 
     provider: str
     base_url: str
@@ -23,7 +33,18 @@ class ResolvedLLMConfig:
 
 
 def _provider_name(cfg: Settings) -> LLMProvider:
-    """Return validated provider name from settings."""
+    """
+    Reads and validates the configured LLM provider from settings.
+
+    Args:
+        cfg (Settings): Application settings instance.
+
+    Returns:
+        LLMProvider: One of openai, gemini, or ollama.
+
+    Raises:
+        ValueError: If the provider name is not supported.
+    """
     provider = cfg.llm_provider.strip().lower()
     if provider not in ("openai", "gemini", "ollama"):
         raise ValueError(
@@ -35,13 +56,13 @@ def _provider_name(cfg: Settings) -> LLMProvider:
 
 def resolve_llm_config(cfg: Settings | None = None) -> ResolvedLLMConfig:
     """
-    Resolve base URL, API key, and model for the configured LLM provider.
+    Builds the URL, API key, and model for the selected LLM provider.
 
     Args:
-        cfg: Optional settings instance (defaults to global settings).
+        cfg (Settings | None): Settings to use. Defaults to the global instance.
 
     Returns:
-        ResolvedLLMConfig for the active provider.
+        ResolvedLLMConfig: Ready-to-use connection details for the LLM client.
     """
     cfg = cfg or settings
     provider = _provider_name(cfg)
@@ -78,13 +99,16 @@ def resolve_llm_config(cfg: Settings | None = None) -> ResolvedLLMConfig:
 
 def validate_llm_config(cfg: Settings | None = None) -> None:
     """
-    Ensure API keys are present for cloud LLM providers.
+    Checks that cloud providers have an API key before summarization runs.
 
     Args:
-        cfg: Optional settings instance (defaults to global settings).
+        cfg (Settings | None): Settings to use. Defaults to the global instance.
+
+    Returns:
+        None
 
     Raises:
-        ValueError: If required credentials are missing.
+        ValueError: If OpenAI or Gemini is selected without an API key.
     """
     resolved = resolve_llm_config(cfg)
     if resolved.provider == "openai" and not resolved.api_key.strip():

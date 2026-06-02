@@ -42,7 +42,12 @@ const GradientConnector = styled(StepConnector)(() => ({
   },
 }))
 
-/** Pipeline stepper with progress and status messaging. */
+/**
+ * Shows pipeline steps, animated progress, and status text during processing.
+ *
+ * @param {ProcessingStatusProps} props - Step index, labels, and chunk count.
+ * @returns {JSX.Element} Stepper and progress UI.
+ */
 export default function ProcessingStatus({
   activeStep,
   steps,

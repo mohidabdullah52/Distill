@@ -9,7 +9,12 @@ interface HeaderProps {
   healthLoading: boolean
 }
 
-/** Top navigation bar with branding and backend status. */
+/**
+ * Renders the top navigation bar with branding and backend status chips.
+ *
+ * @param {HeaderProps} props - Health payload and loading flag from the API.
+ * @returns {JSX.Element} Sticky application header.
+ */
 export default function Header({ health, healthLoading }: HeaderProps) {
   const isOnline = health?.status === 'ok'
   const llmLabel =

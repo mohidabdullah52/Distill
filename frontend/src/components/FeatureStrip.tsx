@@ -12,7 +12,11 @@ const FEATURES = [
   { icon: PictureAsPdfIcon, label: 'Export summary PDF' },
 ] as const
 
-/** Horizontal feature highlights below the hero. */
+/**
+ * Displays a row of product capability highlights below the hero.
+ *
+ * @returns {JSX.Element} Grid of feature labels with icons.
+ */
 export default function FeatureStrip() {
   return (
     <Box

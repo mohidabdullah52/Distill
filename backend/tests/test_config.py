@@ -1,4 +1,6 @@
-"""Tests for LLM provider configuration."""
+"""
+Tests for LLM provider configuration resolution and validation.
+"""
 
 import pytest
 
@@ -14,7 +16,12 @@ from app.llm_config import (
 
 
 def test_resolve_openai_config() -> None:
-    """Happy path: OpenAI provider resolves ChatGPT defaults."""
+    """
+    Verifies OpenAI settings map to the ChatGPT API defaults.
+
+    Returns:
+        None
+    """
     cfg = Settings(
         llm_provider="openai",
         openai_api_key="sk-test",
@@ -31,7 +38,12 @@ def test_resolve_openai_config() -> None:
 
 
 def test_resolve_gemini_config() -> None:
-    """Happy path: Gemini provider resolves Google OpenAI-compatible endpoint."""
+    """
+    Verifies Gemini settings map to the Google OpenAI-compatible endpoint.
+
+    Returns:
+        None
+    """
     cfg = Settings(
         llm_provider="gemini",
         gemini_api_key="gemini-test",
@@ -48,7 +60,12 @@ def test_resolve_gemini_config() -> None:
 
 
 def test_resolve_ollama_config() -> None:
-    """Happy path: Ollama provider uses local defaults without a cloud key."""
+    """
+    Verifies Ollama settings use local defaults without a cloud API key.
+
+    Returns:
+        None
+    """
     cfg = Settings(llm_provider="ollama")
     resolved = resolve_llm_config(cfg)
 
@@ -59,7 +76,12 @@ def test_resolve_ollama_config() -> None:
 
 
 def test_validate_openai_missing_key() -> None:
-    """Edge case: OpenAI without API key raises a clear error."""
+    """
+    Verifies OpenAI validation fails when the API key is empty.
+
+    Returns:
+        None
+    """
     cfg = Settings(llm_provider="openai", openai_api_key="")
 
     with pytest.raises(ValueError, match="OPENAI_API_KEY"):
@@ -67,7 +89,12 @@ def test_validate_openai_missing_key() -> None:
 
 
 def test_validate_gemini_missing_key() -> None:
-    """Edge case: Gemini without API key raises a clear error."""
+    """
+    Verifies Gemini validation fails when the API key is blank.
+
+    Returns:
+        None
+    """
     cfg = Settings(llm_provider="gemini", gemini_api_key="  ")
 
     with pytest.raises(ValueError, match="GEMINI_API_KEY"):
@@ -75,7 +102,12 @@ def test_validate_gemini_missing_key() -> None:
 
 
 def test_invalid_provider_raises() -> None:
-    """Edge case: unknown LLM_PROVIDER is rejected."""
+    """
+    Verifies an unknown provider name is rejected during resolution.
+
+    Returns:
+        None
+    """
     cfg = Settings(llm_provider="anthropic")
 
     with pytest.raises(ValueError, match="Unsupported LLM_PROVIDER"):

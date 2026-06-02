@@ -1,4 +1,6 @@
-"""ReportLab PDF generation from markdown-style summary text."""
+"""
+Turns markdown-style summary text into a formatted PDF report.
+"""
 
 import re
 from datetime import datetime
@@ -23,7 +25,12 @@ DARK_GRAY = colors.HexColor("#424242")
 
 
 def _build_styles():
-    """Create custom paragraph styles for the summary PDF."""
+    """
+    Prepares ReportLab paragraph styles used in the summary PDF.
+
+    Returns:
+        StyleSheet1: Stylesheet with title, heading, body, and bullet styles.
+    """
     styles = getSampleStyleSheet()
     styles.add(
         ParagraphStyle(
@@ -83,12 +90,15 @@ def _build_styles():
 
 def markdown_to_pdf(summary_text: str, output_path: Path, source_files: list[str]) -> None:
     """
-    Convert LLM markdown summary text into a polished PDF file.
+    Renders markdown-like summary content into a PDF file on disk.
 
     Args:
-        summary_text: Markdown summary from the LLM.
-        output_path: Destination PDF path.
-        source_files: Original filenames for the title block.
+        summary_text (str): Markdown summary returned by the language model.
+        output_path (Path): Destination path for the PDF file.
+        source_files (list[str]): Original upload names shown in the report header.
+
+    Returns:
+        None
     """
     doc = SimpleDocTemplate(
         str(output_path),

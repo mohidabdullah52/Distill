@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react'
 import { fetchHealth, type HealthResponse } from '../api/health'
 
-/** Poll backend health for LLM provider display in the header. */
+/**
+ * Polls the backend health endpoint for API and LLM status.
+ *
+ * @returns {{ health: HealthResponse | null; loading: boolean }} Latest health payload and loading flag.
+ */
 export function useBackendHealth() {
   const [health, setHealth] = useState<HealthResponse | null>(null)
   const [loading, setLoading] = useState(true)

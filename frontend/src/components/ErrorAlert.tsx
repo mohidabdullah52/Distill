@@ -6,7 +6,12 @@ interface ErrorAlertProps {
   onDismiss: () => void
 }
 
-/** Dismissible error alert for pipeline failures. */
+/**
+ * Shows a dismissible error message when the pipeline fails.
+ *
+ * @param {ErrorAlertProps} props - Error text and dismiss callback.
+ * @returns {JSX.Element | null} Alert banner or null when there is no error.
+ */
 export default function ErrorAlert({ message, onDismiss }: ErrorAlertProps) {
   return (
     <Collapse in={Boolean(message)}>

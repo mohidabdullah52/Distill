@@ -10,7 +10,12 @@ interface DropZoneProps {
   disabled?: boolean
 }
 
-/** Drag-and-drop and browse upload area for PDF/PPTX files. */
+/**
+ * Renders a drag-and-drop and browse upload area for PDF and PPTX files.
+ *
+ * @param {DropZoneProps} props - Callback when files are added and optional disabled flag.
+ * @returns {JSX.Element} Interactive upload zone.
+ */
 export default function DropZone({ onFilesAdded, disabled }: DropZoneProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)

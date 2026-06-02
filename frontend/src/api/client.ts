@@ -1,3 +1,6 @@
+/**
+ * Configures the shared HTTP client used for API requests.
+ */
 import axios from 'axios'
 
 const client = axios.create({

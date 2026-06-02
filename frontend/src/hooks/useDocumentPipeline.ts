@@ -66,6 +66,13 @@ const initialState: PipelineState = {
   error: null,
 }
 
+/**
+ * Updates pipeline state based on ingest and summarize progress events.
+ *
+ * @param {PipelineState} state - Current pipeline state.
+ * @param {PipelineAction} action - Dispatched state transition.
+ * @returns {PipelineState} Next pipeline state.
+ */
 function reducer(state: PipelineState, action: PipelineAction): PipelineState {
   switch (action.type) {
     case 'SET_FILES':
@@ -101,6 +108,12 @@ function reducer(state: PipelineState, action: PipelineAction): PipelineState {
   }
 }
 
+/**
+ * Converts API error payloads into a user-facing message string.
+ *
+ * @param {unknown} detail - Error body from axios or the backend.
+ * @returns {string} Readable error message for the UI.
+ */
 function formatError(detail: unknown): string {
   if (typeof detail === 'string') return detail
   if (Array.isArray(detail)) {
@@ -109,6 +122,11 @@ function formatError(detail: unknown): string {
   return 'An unexpected error occurred.'
 }
 
+/**
+ * Manages upload, ingest, summarize, and result state for the document workflow.
+ *
+ * @returns {object} Pipeline state, step labels, and action handlers for the UI.
+ */
 export function useDocumentPipeline() {
   const [state, dispatch] = useReducer(reducer, initialState)
 

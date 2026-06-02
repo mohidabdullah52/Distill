@@ -125,6 +125,9 @@ const theme = createTheme({
   },
 })
 
+/**
+ * Shared glassmorphism styles applied to elevated surface cards.
+ */
 export const glassCard = {
   background: alpha('#161822', 0.65),
   backdropFilter: 'blur(20px)',

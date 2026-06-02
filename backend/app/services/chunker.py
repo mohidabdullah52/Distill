@@ -1,4 +1,6 @@
-"""Sliding-window text chunking for vector indexing."""
+"""
+Splits extracted page text into overlapping chunks for vector search.
+"""
 
 from typing import Any, Dict, List
 
@@ -12,15 +14,15 @@ def chunk_pages(
     chunk_overlap: int | None = None,
 ) -> List[Dict[str, Any]]:
     """
-    Split page text into overlapping chunks ready for ChromaDB.
+    Breaks page text into fixed-size overlapping segments for embedding.
 
     Args:
-        pages: List of (source, page_num, text) tuples from the parser.
-        chunk_size: Optional override for chunk character length.
-        chunk_overlap: Optional override for overlap between chunks.
+        pages (List[PageTuple]): Parsed pages from the document parser.
+        chunk_size (int | None): Character length per chunk. Uses settings when omitted.
+        chunk_overlap (int | None): Overlap between consecutive chunks.
 
     Returns:
-        List of dicts with id, text, and metadata keys.
+        List[Dict[str, Any]]: Chunk records with id, text, and metadata fields.
     """
     size = chunk_size or settings.chunk_size
     overlap = chunk_overlap or settings.chunk_overlap

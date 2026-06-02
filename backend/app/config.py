@@ -1,4 +1,6 @@
-"""Application settings loaded from environment variables."""
+"""
+Loads application settings from environment variables and resolves storage paths.
+"""
 
 from pathlib import Path
 
@@ -10,7 +12,11 @@ _REPO_ROOT = _BACKEND_ROOT.parent
 
 
 class Settings(BaseSettings):
-    """Pydantic settings for the RAG summarizer backend."""
+    """
+    Holds configuration for the API, LLM providers, chunking, and file storage.
+
+    Values are read from `.env` at the repo root and under `backend/`.
+    """
 
     model_config = SettingsConfigDict(
         env_file=(
@@ -47,25 +53,48 @@ class Settings(BaseSettings):
     @field_validator("llm_provider")
     @classmethod
     def normalize_provider(cls, value: str) -> str:
-        """Normalize provider name to lowercase."""
+        """
+        Normalizes the LLM provider name for consistent lookups.
+
+        Args:
+            value (str): Raw provider string from the environment.
+
+        Returns:
+            str: Lowercase, trimmed provider name.
+        """
         return value.strip().lower()
 
     def chroma_path(self) -> Path:
-        """Return resolved Chroma persistence directory."""
+        """
+        Resolves the on-disk directory used by ChromaDB.
+
+        Returns:
+            Path: Absolute path to the Chroma persistence folder.
+        """
         path = Path(self.chroma_persist_dir)
         if not path.is_absolute():
             path = _BACKEND_ROOT / path
         return path
 
     def upload_path(self) -> Path:
-        """Return resolved upload directory."""
+        """
+        Resolves the directory where uploaded files are stored.
+
+        Returns:
+            Path: Absolute path to the uploads folder.
+        """
         path = Path(self.upload_dir)
         if not path.is_absolute():
             path = _BACKEND_ROOT / path
         return path
 
     def output_path(self) -> Path:
-        """Return resolved output directory."""
+        """
+        Resolves the directory where generated PDFs are written.
+
+        Returns:
+            Path: Absolute path to the outputs folder.
+        """
         path = Path(self.output_dir)
         if not path.is_absolute():
             path = _BACKEND_ROOT / path

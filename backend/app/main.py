@@ -1,7 +1,8 @@
-"""FastAPI application entry point."""
+"""
+Defines the FastAPI application, middleware, routes, and health endpoint.
+"""
 
 from contextlib import asynccontextmanager
-from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,7 +15,15 @@ from app.services.llm import get_active_llm_info
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    """Ensure upload, output, and Chroma directories exist at startup."""
+    """
+    Creates required storage directories when the server starts.
+
+    Args:
+        _app (FastAPI): The running application instance.
+
+    Yields:
+        None: Control returns to FastAPI after startup work completes.
+    """
     settings.upload_path().mkdir(parents=True, exist_ok=True)
     settings.output_path().mkdir(parents=True, exist_ok=True)
     settings.chroma_path().mkdir(parents=True, exist_ok=True)
@@ -46,7 +55,12 @@ app.include_router(summarize_router, prefix="/api")
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    """Health check endpoint with active LLM provider metadata."""
+    """
+    Reports service health and which LLM provider is configured.
+
+    Returns:
+        dict[str, str]: Status plus provider and model when configuration is valid.
+    """
     payload: dict[str, str] = {"status": "ok"}
     try:
         payload.update(get_active_llm_info())

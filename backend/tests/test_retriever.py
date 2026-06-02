@@ -1,4 +1,6 @@
-"""Tests for multi-query retrieval."""
+"""
+Tests for multi-query chunk retrieval.
+"""
 
 from unittest.mock import patch
 
@@ -6,7 +8,12 @@ from app.services.retriever import retrieve_for_summary
 
 
 def test_retrieve_deduplicates_chunks() -> None:
-    """Happy path: duplicate chunks across queries are merged once."""
+    """
+    Verifies duplicate chunks from multiple queries appear only once.
+
+    Returns:
+        None
+    """
 
     def mock_query(_session_id: str, query: str, top_k: int | None = None) -> list[str]:
         if "main topic" in query:
@@ -22,7 +29,12 @@ def test_retrieve_deduplicates_chunks() -> None:
 
 
 def test_retrieve_includes_focus_prompt_query() -> None:
-    """Edge case: focus prompt adds an extra retrieval query."""
+    """
+    Verifies a user focus prompt is included as an extra retrieval query.
+
+    Returns:
+        None
+    """
     with patch(
         "app.services.retriever.query_chunks",
         return_value=["focused chunk"],

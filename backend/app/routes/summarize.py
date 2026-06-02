@@ -1,4 +1,6 @@
-"""Summary generation and PDF download routes."""
+"""
+Generates AI summaries and serves the resulting PDF files.
+"""
 
 from pathlib import Path
 
@@ -18,10 +20,16 @@ router = APIRouter()
 @router.post("/summarize", response_model=SummarizeResponse)
 async def summarize(req: SummarizeRequest) -> SummarizeResponse:
     """
-    Retrieve chunks, generate an LLM summary, and produce a downloadable PDF.
+    Retrieves chunks, asks the LLM for a summary, and writes a downloadable PDF.
+
+    Args:
+        req (SummarizeRequest): Session id and optional focus prompt.
 
     Returns:
-        SummarizeResponse with download URL and text preview.
+        SummarizeResponse: Download path and a short preview of the summary text.
+
+    Raises:
+        HTTPException: When the session is missing, empty, or the LLM is misconfigured.
     """
     session_id = req.session_id
 
@@ -71,13 +79,16 @@ async def summarize(req: SummarizeRequest) -> SummarizeResponse:
 @router.get("/download/{filename}")
 async def download_pdf(filename: str) -> FileResponse:
     """
-    Stream a generated summary PDF to the client.
+    Streams a previously generated summary PDF to the browser.
 
     Args:
-        filename: PDF filename under the outputs directory.
+        filename (str): PDF filename located under the outputs directory.
 
     Returns:
-        FileResponse with application/pdf media type.
+        FileResponse: PDF bytes with an appropriate content type.
+
+    Raises:
+        HTTPException: If the file is missing or the path is outside outputs.
     """
     output_dir = settings.output_path().resolve()
     file_path = (output_dir / filename).resolve()

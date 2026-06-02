@@ -1,4 +1,6 @@
-"""Tests for LLM summary generation (mocked)."""
+"""
+Tests for LLM summary generation with mocked API calls.
+"""
 
 from unittest.mock import MagicMock, patch
 
@@ -21,7 +23,17 @@ _MOCK_LLM_CONFIG = ResolvedLLMConfig(
 def test_generate_summary_returns_content(
     mock_get_client, _mock_resolve, _mock_validate
 ) -> None:
-    """Happy path: mocked LLM returns summary text."""
+    """
+    Verifies a mocked chat completion returns structured summary text.
+
+    Args:
+        mock_get_client (MagicMock): Patched OpenAI client factory.
+        _mock_resolve (MagicMock): Patched config resolver.
+        _mock_validate (MagicMock): Patched credential validation.
+
+    Returns:
+        None
+    """
     mock_message = MagicMock()
     mock_message.content = "## Executive Summary\n\nTest summary."
 
@@ -49,7 +61,17 @@ def test_generate_summary_returns_content(
 def test_generate_summary_empty_chunks(
     mock_get_client, _mock_resolve, _mock_validate
 ) -> None:
-    """Edge case: empty chunk list still calls the LLM."""
+    """
+    Verifies the LLM is still called when no chunks are provided.
+
+    Args:
+        mock_get_client (MagicMock): Patched OpenAI client factory.
+        _mock_resolve (MagicMock): Patched config resolver.
+        _mock_validate (MagicMock): Patched credential validation.
+
+    Returns:
+        None
+    """
     mock_message = MagicMock()
     mock_message.content = "## Executive Summary\n\nNo content."
 
@@ -73,14 +95,30 @@ def test_generate_summary_empty_chunks(
     side_effect=ValueError("OPENAI_API_KEY is required"),
 )
 def test_generate_summary_missing_api_key(_mock_validate) -> None:
-    """Edge case: missing cloud API key surfaces before LLM call."""
+    """
+    Verifies missing credentials raise before any network call is made.
+
+    Args:
+        _mock_validate (MagicMock): Patched validation that raises.
+
+    Returns:
+        None
+    """
     with pytest.raises(ValueError, match="OPENAI_API_KEY"):
         llm.generate_summary(["chunk"])
 
 
 @patch("app.services.llm.resolve_llm_config", return_value=_MOCK_LLM_CONFIG)
 def test_get_active_llm_info(_mock_resolve) -> None:
-    """Happy path: active LLM metadata excludes secrets."""
+    """
+    Verifies health metadata includes provider and model without secrets.
+
+    Args:
+        _mock_resolve (MagicMock): Patched config resolver.
+
+    Returns:
+        None
+    """
     info = llm.get_active_llm_info()
 
     assert info == {"provider": "openai", "model": "gpt-4o-mini"}

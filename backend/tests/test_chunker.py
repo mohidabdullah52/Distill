@@ -1,10 +1,20 @@
-"""Tests for text chunking."""
+"""
+Tests for text chunking.
+"""
 
 from app.services.chunker import chunk_pages
 
 
 def test_chunk_pages_happy_path(sample_pages) -> None:
-    """Happy path: pages produce chunks with metadata."""
+    """
+    Verifies parsed pages are split into chunks with expected metadata.
+
+    Args:
+        sample_pages (list): Fixture providing sample page tuples.
+
+    Returns:
+        None
+    """
     chunks = chunk_pages(sample_pages, chunk_size=40, chunk_overlap=10)
 
     assert len(chunks) >= 1
@@ -15,5 +25,10 @@ def test_chunk_pages_happy_path(sample_pages) -> None:
 
 
 def test_chunk_pages_empty_input() -> None:
-    """Edge case: no pages yields no chunks."""
+    """
+    Verifies an empty page list produces no chunks.
+
+    Returns:
+        None
+    """
     assert chunk_pages([]) == []

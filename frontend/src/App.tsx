@@ -1,3 +1,6 @@
+/**
+ * Root application layout for the Distill document summarization workflow.
+ */
 import { useState } from 'react'
 import {
   Box,
@@ -24,6 +27,11 @@ import ErrorAlert from './components/ErrorAlert'
 import { useDocumentPipeline } from './hooks/useDocumentPipeline'
 import { useBackendHealth } from './hooks/useBackendHealth'
 
+/**
+ * Composes the main upload, processing, and result experience.
+ *
+ * @returns {JSX.Element} Full application page.
+ */
 export default function App() {
   const { state, STEPS, addFiles, removeFile, run, reset, dismissError } =
     useDocumentPipeline()

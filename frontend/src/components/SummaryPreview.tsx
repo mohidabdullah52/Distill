@@ -5,7 +5,12 @@ interface SummaryPreviewProps {
   text: string
 }
 
-/** Renders a scrollable summary preview with basic markdown heading styles. */
+/**
+ * Renders a scrollable summary preview with simple markdown styling.
+ *
+ * @param {SummaryPreviewProps} props - Markdown summary text to display.
+ * @returns {JSX.Element} Formatted preview panel.
+ */
 export default function SummaryPreview({ text }: SummaryPreviewProps) {
   const lines = text.split('\n')
 

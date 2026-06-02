@@ -13,7 +13,12 @@ interface ResultCardProps {
   onReset: () => void
 }
 
-/** Success state with summary preview and download actions. */
+/**
+ * Displays the finished summary preview and download actions.
+ *
+ * @param {ResultCardProps} props - Download URL, preview text, and reset handler.
+ * @returns {JSX.Element} Result panel after summarization completes.
+ */
 export default function ResultCard({
   downloadUrl,
   summaryPreview,

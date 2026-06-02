@@ -1,4 +1,6 @@
-"""Tests for document text extraction."""
+"""
+Tests for document text extraction.
+"""
 
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -9,7 +11,15 @@ from app.services.parser import extract_text
 
 
 def test_extract_pdf_returns_page_text(tmp_path: Path) -> None:
-    """Happy path: PDF pages with text are returned."""
+    """
+    Confirms readable PDF pages are returned with source metadata.
+
+    Args:
+        tmp_path (Path): Pytest temporary directory for test files.
+
+    Returns:
+        None
+    """
     pdf_path = tmp_path / "doc.pdf"
     pdf_path.write_bytes(b"%PDF-fake")
 
@@ -27,7 +37,15 @@ def test_extract_pdf_returns_page_text(tmp_path: Path) -> None:
 
 
 def test_extract_text_unsupported_extension(tmp_path: Path) -> None:
-    """Edge case: unsupported file type raises ValueError."""
+    """
+    Ensures unsupported extensions raise a clear validation error.
+
+    Args:
+        tmp_path (Path): Pytest temporary directory for test files.
+
+    Returns:
+        None
+    """
     bad_file = tmp_path / "notes.txt"
     bad_file.write_text("hello")
 
@@ -36,7 +54,15 @@ def test_extract_text_unsupported_extension(tmp_path: Path) -> None:
 
 
 def test_extract_pdf_skips_empty_pages(tmp_path: Path) -> None:
-    """Edge case: blank pages are omitted from results."""
+    """
+    Ensures pages with only whitespace are not included in results.
+
+    Args:
+        tmp_path (Path): Pytest temporary directory for test files.
+
+    Returns:
+        None
+    """
     pdf_path = tmp_path / "blank.pdf"
     pdf_path.write_bytes(b"%PDF-fake")
 

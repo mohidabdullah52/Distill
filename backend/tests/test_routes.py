@@ -1,9 +1,10 @@
-"""Tests for FastAPI routes."""
+"""
+Tests for FastAPI HTTP routes.
+"""
 
 from io import BytesIO
 from unittest.mock import patch
 
-import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -12,7 +13,12 @@ client = TestClient(app)
 
 
 def test_health_endpoint() -> None:
-    """Happy path: health check returns ok with LLM metadata."""
+    """
+    Verifies the health endpoint returns status and LLM metadata.
+
+    Returns:
+        None
+    """
     with patch(
         "app.main.get_active_llm_info",
         return_value={"provider": "openai", "model": "gpt-4o-mini"},
@@ -33,7 +39,16 @@ def test_health_endpoint() -> None:
     return_value=["chunk"],
 )
 def test_summarize_llm_config_error(mock_retrieve, mock_llm) -> None:
-    """Edge case: missing LLM credentials return 503."""
+    """
+    Verifies missing LLM credentials return HTTP 503 on summarize.
+
+    Args:
+        mock_retrieve (MagicMock): Patched retrieval returning chunks.
+        mock_llm (MagicMock): Patched summary generation that raises.
+
+    Returns:
+        None
+    """
     response = client.post(
         "/api/summarize",
         json={"session_id": "abc123", "focus_prompt": None},
@@ -43,13 +58,23 @@ def test_summarize_llm_config_error(mock_retrieve, mock_llm) -> None:
 
 
 def test_ingest_no_files() -> None:
-    """Edge case: ingest without files returns 400."""
+    """
+    Verifies ingest rejects requests with no uploaded files.
+
+    Returns:
+        None
+    """
     response = client.post("/api/ingest", files=[])
     assert response.status_code == 422
 
 
 def test_ingest_unsupported_type() -> None:
-    """Edge case: unsupported file extension returns 400."""
+    """
+    Verifies ingest rejects unsupported file extensions.
+
+    Returns:
+        None
+    """
     response = client.post(
         "/api/ingest",
         files=[("files", ("notes.txt", BytesIO(b"hello"), "text/plain"))],
@@ -61,7 +86,17 @@ def test_ingest_unsupported_type() -> None:
 @patch("app.routes.ingest.chunk_pages", return_value=[{"id": "x", "text": "t", "metadata": {}}])
 @patch("app.routes.ingest.extract_text", return_value=[("a.pdf", 1, "text")])
 def test_ingest_success(mock_extract, mock_chunk, mock_upsert) -> None:
-    """Happy path: valid PDF upload returns session metadata."""
+    """
+    Verifies a valid PDF upload returns session and chunk metadata.
+
+    Args:
+        mock_extract (MagicMock): Patched text extraction.
+        mock_chunk (MagicMock): Patched chunking step.
+        mock_upsert (MagicMock): Patched vector upsert.
+
+    Returns:
+        None
+    """
     response = client.post(
         "/api/ingest",
         files=[("files", ("report.pdf", BytesIO(b"%PDF"), "application/pdf"))],
@@ -85,7 +120,18 @@ def test_ingest_success(mock_extract, mock_chunk, mock_upsert) -> None:
 def test_summarize_success(
     mock_retrieve, mock_llm, mock_sources, mock_pdf
 ) -> None:
-    """Happy path: summarize returns download URL."""
+    """
+    Verifies summarize returns a download URL and text preview.
+
+    Args:
+        mock_retrieve (MagicMock): Patched chunk retrieval.
+        mock_llm (MagicMock): Patched summary generation.
+        mock_sources (MagicMock): Patched source filename lookup.
+        mock_pdf (MagicMock): Patched PDF rendering.
+
+    Returns:
+        None
+    """
     response = client.post(
         "/api/summarize",
         json={"session_id": "abc123", "focus_prompt": None},

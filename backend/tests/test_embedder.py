@@ -1,4 +1,6 @@
-"""Tests for ChromaDB embedder (mocked)."""
+"""
+Tests for ChromaDB embedder with mocked clients.
+"""
 
 from unittest.mock import MagicMock, patch
 
@@ -9,14 +11,24 @@ from app.services import embedder
 
 @pytest.fixture(autouse=True)
 def reset_embedder_client():
-    """Reset singleton client between tests."""
+    """
+    Clears the embedder singleton before and after each test.
+
+    Yields:
+        None
+    """
     embedder._client = None
     yield
     embedder._client = None
 
 
 def test_upsert_chunks_calls_collection() -> None:
-    """Happy path: upsert delegates to Chroma collection."""
+    """
+    Verifies chunk upsert delegates to the Chroma collection API.
+
+    Returns:
+        None
+    """
     mock_collection = MagicMock()
     mock_client = MagicMock()
     mock_client.get_or_create_collection.return_value = mock_collection
@@ -39,7 +51,12 @@ def test_upsert_chunks_calls_collection() -> None:
 
 
 def test_query_chunks_missing_session_raises() -> None:
-    """Edge case: missing collection propagates error."""
+    """
+    Verifies a missing collection surfaces as an error from Chroma.
+
+    Returns:
+        None
+    """
     mock_client = MagicMock()
     mock_client.get_collection.side_effect = Exception("Collection not found")
 

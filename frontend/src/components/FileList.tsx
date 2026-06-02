@@ -10,12 +10,24 @@ interface FileListProps {
   disabled?: boolean
 }
 
+/**
+ * Formats a byte count for display in the file list.
+ *
+ * @param {number} bytes - File size in bytes.
+ * @returns {string} Human-readable size label.
+ */
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+/**
+ * Chooses an icon based on the file extension.
+ *
+ * @param {string} name - Filename including extension.
+ * @returns {JSX.Element} Material icon for PDF or presentation files.
+ */
 function getIcon(name: string) {
   return /\.pdf$/i.test(name) ? (
     <PictureAsPdfIcon fontSize="small" />
@@ -24,7 +36,12 @@ function getIcon(name: string) {
   )
 }
 
-/** List of selected files with size and remove actions. */
+/**
+ * Lists selected files with size labels and remove controls.
+ *
+ * @param {FileListProps} props - Files to display and removal handler.
+ * @returns {JSX.Element | null} File list or null when empty.
+ */
 export default function FileList({ files, onRemove, disabled }: FileListProps) {
   if (!files.length) return null
 

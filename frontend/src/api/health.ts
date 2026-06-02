@@ -1,3 +1,6 @@
+/**
+ * Fetches backend health and LLM provider metadata.
+ */
 import axios from 'axios'
 
 export interface HealthResponse {
@@ -12,7 +15,11 @@ const healthClient = axios.create({
   timeout: 10000,
 })
 
-/** Fetch backend health and LLM provider metadata. */
+/**
+ * Requests the backend health endpoint.
+ *
+ * @returns {Promise<HealthResponse>} Current API status and LLM configuration info.
+ */
 export async function fetchHealth(): Promise<HealthResponse> {
   const { data } = await healthClient.get<HealthResponse>('/health')
   return data

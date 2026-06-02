@@ -1,4 +1,6 @@
-"""Multi-query retrieval for comprehensive summary context."""
+"""
+Runs several semantic searches and merges the results for summarization.
+"""
 
 from typing import List
 
@@ -16,14 +18,14 @@ RETRIEVAL_QUERIES = [
 
 def retrieve_for_summary(session_id: str, focus_prompt: str | None = None) -> List[str]:
     """
-    Retrieve deduplicated chunks using multiple semantic query angles.
+    Gathers unique chunks by querying the vector store from multiple angles.
 
     Args:
-        session_id: Ingest session identifier.
-        focus_prompt: Optional user focus appended as an extra query.
+        session_id (str): Session identifier from ingest.
+        focus_prompt (str | None): Extra query text when the user sets a focus area.
 
     Returns:
-        Deduplicated list of chunk texts.
+        List[str]: Deduplicated chunk texts ranked for summary context.
     """
     queries = list(RETRIEVAL_QUERIES)
     if focus_prompt:
