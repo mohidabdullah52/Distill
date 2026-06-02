@@ -45,3 +45,21 @@ def test_markdown_to_pdf_empty_sources(tmp_path: Path) -> None:
     markdown_to_pdf("## Executive Summary\n\nBody.", output, [])
 
     assert output.exists()
+
+
+def test_markdown_to_pdf_xml_escaping(tmp_path: Path) -> None:
+    """
+    Verifies that markdown input with XML special characters (e.g. & < >)
+    does not cause parsing crashes and generates a valid PDF.
+    """
+    output = tmp_path / "xml_escape_test.pdf"
+    summary = """## XML & Special Characters
+If x < y and y > z:
+- Detail & more detail
+- Formula: a < b
+"""
+    markdown_to_pdf(summary, output, ["a&b < c > d.pdf"])
+
+    assert output.exists()
+    assert output.stat().st_size > 0
+

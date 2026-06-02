@@ -88,6 +88,13 @@ def _build_styles():
     return styles
 
 
+def escape_xml(text: str) -> str:
+    """
+    Escapes special XML characters to prevent ReportLab parser crashes.
+    """
+    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
 def markdown_to_pdf(summary_text: str, output_path: Path, source_files: list[str]) -> None:
     """
     Renders markdown-like summary content into a PDF file on disk.
@@ -113,6 +120,7 @@ def markdown_to_pdf(summary_text: str, output_path: Path, source_files: list[str
 
     story.append(Paragraph("Document Summary Report", styles["DocTitle"]))
     sources_label = ", ".join(source_files) if source_files else "Multiple Files"
+    sources_label = escape_xml(sources_label)
     ts = datetime.now().strftime("%B %d, %Y %H:%M")
     story.append(
         Paragraph(
@@ -131,6 +139,7 @@ def markdown_to_pdf(summary_text: str, output_path: Path, source_files: list[str
 
         if line.startswith("## "):
             heading = line[3:].strip()
+            heading = escape_xml(heading)
             story.append(Paragraph(heading, styles["H2"]))
             story.append(
                 HRFlowable(
@@ -146,6 +155,7 @@ def markdown_to_pdf(summary_text: str, output_path: Path, source_files: list[str
                 lines[i].startswith("- ") or lines[i].startswith("* ")
             ):
                 bullet_text = lines[i][2:].strip()
+                bullet_text = escape_xml(bullet_text)
                 bullets.append(
                     ListItem(
                         Paragraph(bullet_text, styles["BulletText"]),
@@ -162,6 +172,7 @@ def markdown_to_pdf(summary_text: str, output_path: Path, source_files: list[str
         elif line.strip() == "":
             story.append(Spacer(1, 6))
         else:
+            line = escape_xml(line)
             line = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", line)
             story.append(Paragraph(line, styles["Body"]))
 
