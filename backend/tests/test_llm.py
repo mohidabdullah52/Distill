@@ -53,6 +53,7 @@ def test_generate_summary_returns_content(
     mock_client.chat.completions.create.assert_called_once()
     call_kwargs = mock_client.chat.completions.create.call_args.kwargs
     assert call_kwargs["model"] == "gpt-4o-mini"
+    assert call_kwargs["timeout"] == 120.0
 
 
 @patch("app.services.llm.validate_llm_config")

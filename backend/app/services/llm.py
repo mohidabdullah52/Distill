@@ -6,6 +6,7 @@ from typing import List
 
 from openai import OpenAI
 
+from app.config import settings
 from app.llm_config import ResolvedLLMConfig, resolve_llm_config, validate_llm_config
 
 _client: OpenAI | None = None
@@ -68,6 +69,7 @@ def _get_client() -> OpenAI:
         _client = OpenAI(
             base_url=config.base_url,
             api_key=config.api_key,
+            max_retries=3,
         )
         _client_signature = signature
 
@@ -116,6 +118,7 @@ def generate_summary(chunks: List[str], focus_prompt: str | None = None) -> str:
             {"role": "user", "content": user_content},
         ],
         temperature=0.3,
+        timeout=settings.llm_timeout,
     )
 
     content = response.choices[0].message.content

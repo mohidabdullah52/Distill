@@ -137,3 +137,11 @@ def test_cors_origins_parsing() -> None:
     assert cfg2.cors_origins == ["http://site1.com", "http://site2.com", "http://site3.com"]
 
 
+def test_settings_defaults() -> None:
+    """
+    Verifies default values for the new setting attributes.
+    """
+    cfg = Settings()
+    assert cfg.llm_timeout == 120.0
+
+

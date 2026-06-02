@@ -51,6 +51,7 @@ class Settings(BaseSettings):
     top_k_chunks: int = 12
     max_file_size: int = 50 * 1024 * 1024
     embedding_model: str = "all-MiniLM-L6-v2"
+    llm_timeout: float = 120.0
     cors_origins: list[str] = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
