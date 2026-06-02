@@ -165,6 +165,9 @@ export function useDocumentPipeline() {
         })
         ingestData = res.data
         dispatch({ type: 'INGEST_SUCCESS', payload: ingestData })
+        
+        // Let the user see the "Index Documents" step is active before starting summarization
+        await new Promise((resolve) => setTimeout(resolve, 1200))
       } catch (err: unknown) {
         const detail =
           axios.isAxiosError(err) && err.response?.data?.detail
