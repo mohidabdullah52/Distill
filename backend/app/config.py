@@ -3,6 +3,7 @@ Loads application settings from environment variables and resolves storage paths
 """
 
 from pathlib import Path
+from typing import Any
 
 from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -50,6 +51,11 @@ class Settings(BaseSettings):
     top_k_chunks: int = 12
     max_file_size: int = 50 * 1024 * 1024
     embedding_model: str = "all-MiniLM-L6-v2"
+    cors_origins: list[str] = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+    ]
 
     @field_validator("llm_provider")
     @classmethod
@@ -64,6 +70,16 @@ class Settings(BaseSettings):
             str: Lowercase, trimmed provider name.
         """
         return value.strip().lower()
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, value: Any) -> list[str]:
+        """
+        Parses cors_origins from a comma-separated string if provided from environment.
+        """
+        if isinstance(value, str):
+            return [origin.strip() for origin in value.split(",") if origin.strip()]
+        return value
 
     @model_validator(mode="after")
     def validate_overlap(self) -> "Settings":

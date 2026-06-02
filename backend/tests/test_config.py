@@ -124,3 +124,16 @@ def test_chunk_size_overlap_validation() -> None:
     with pytest.raises(ValueError, match="chunk_overlap must be less than chunk_size"):
         Settings(chunk_size=100, chunk_overlap=120)
 
+
+def test_cors_origins_parsing() -> None:
+    """
+    Verifies that CORS origins are correctly parsed from a comma-separated string
+    or preserved if passed as a list of strings.
+    """
+    cfg1 = Settings(cors_origins=["http://site1.com", "http://site2.com"])
+    assert cfg1.cors_origins == ["http://site1.com", "http://site2.com"]
+
+    cfg2 = Settings(cors_origins="http://site1.com, http://site2.com,http://site3.com")
+    assert cfg2.cors_origins == ["http://site1.com", "http://site2.com", "http://site3.com"]
+
+
