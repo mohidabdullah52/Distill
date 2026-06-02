@@ -190,6 +190,8 @@ export function useDocumentPipeline() {
             ? err.response.data.detail
             : 'Failed to generate summary.'
         dispatch({ type: 'ERROR', payload: formatError(detail) })
+        // Clean up the session data (temp files and Chroma collection) on failure
+        client.post(`/cleanup/${ingestData.session_id}`).catch(() => {})
       }
     },
     [state.files],
