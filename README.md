@@ -4,14 +4,15 @@ Upload PDFs and PowerPoint files and receive a compact, AI-generated summary PDF
 
 ## Stack
 
-- **Backend:** FastAPI, ChromaDB, sentence-transformers, Ollama (OpenAI-compatible)
+- **Backend:** FastAPI, ChromaDB, sentence-transformers
+- **LLM:** ChatGPT (OpenAI), Google Gemini, or local Ollama — configured via `.env`
 - **Frontend:** React, Vite, Material UI
 
 ## Prerequisites
 
 - Python 3.11+
 - Node.js 20+
-- [Ollama](https://ollama.ai) with a model pulled (default: `llama3`), or OpenAI API credentials
+- An API key for **ChatGPT** or **Gemini**, or a local [Ollama](https://ollama.ai) install
 
 ## Quick start
 
@@ -24,12 +25,37 @@ python -m venv .venv
 pip install -r backend\requirements.txt
 ```
 
-### 2. Backend configuration
+### 2. Configure LLM (required for summarization)
 
 ```bash
-copy backend\.env.example backend\.env
-# Edit backend\.env if using OpenAI instead of Ollama
+copy .env.example .env
 ```
+
+Edit `.env` and choose a provider:
+
+| Provider | Set in `.env` | API key variable |
+|----------|---------------|------------------|
+| **ChatGPT** | `LLM_PROVIDER=openai` | `OPENAI_API_KEY` from [OpenAI](https://platform.openai.com/api-keys) |
+| **Gemini** | `LLM_PROVIDER=gemini` | `GEMINI_API_KEY` from [Google AI Studio](https://aistudio.google.com/apikey) |
+| **Ollama** (local) | `LLM_PROVIDER=ollama` | No key — run `ollama pull llama3` |
+
+Example (ChatGPT):
+
+```env
+LLM_PROVIDER=openai
+OPENAI_API_KEY=sk-your-key-here
+OPENAI_MODEL=gpt-4o-mini
+```
+
+Example (Gemini):
+
+```env
+LLM_PROVIDER=gemini
+GEMINI_API_KEY=your-gemini-key-here
+GEMINI_MODEL=gemini-2.0-flash
+```
+
+Environment files are loaded from the repo root `.env` and/or `backend/.env` (backend overrides root).
 
 ### 3. Start backend
 
@@ -37,6 +63,8 @@ copy backend\.env.example backend\.env
 cd backend
 ..\.venv\Scripts\uvicorn app.main:app --reload --port 8000
 ```
+
+Check configuration: `GET http://localhost:8000/health` returns `provider` and `model`.
 
 ### 4. Start frontend
 
@@ -52,7 +80,7 @@ Open http://localhost:5173, upload PDF/PPTX files, optionally set a focus area, 
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/health` | Health check |
+| GET | `/health` | Health check + active LLM provider/model |
 | POST | `/api/ingest` | Upload and index documents |
 | POST | `/api/summarize` | Generate summary PDF |
 | GET | `/api/download/{filename}` | Download generated PDF |
@@ -64,18 +92,19 @@ cd backend
 ..\.venv\Scripts\pytest tests/ -v
 ```
 
-All tests use mocked LLM and ChromaDB — no live Ollama or Hugging Face calls during CI.
+All tests use mocked LLM and ChromaDB — no real API keys or network calls during tests.
 
 ## Project layout
 
 ```
 Summarag/
-├── backend/          # FastAPI app, services, tests
-├── frontend/         # React + MUI UI
-├── .venv/            # Python virtual environment (gitignored)
+├── .env.example          # LLM + app config template (copy to .env)
+├── backend/              # FastAPI app, services, tests
+├── frontend/             # React + MUI UI
+├── .venv/                # Python virtual environment (gitignored)
 └── README.md
 ```
 
 ## Environment variables
 
-See `backend/.env.example` for `LLM_BASE_URL`, `LLM_MODEL`, chunk sizes, and storage paths.
+See [`.env.example`](.env.example) for all options: `LLM_PROVIDER`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, chunk sizes, and storage paths.

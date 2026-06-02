@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.routes.ingest import router as ingest_router
 from app.routes.summarize import router as summarize_router
+from app.services.llm import get_active_llm_info
 
 
 @asynccontextmanager
@@ -45,5 +46,10 @@ app.include_router(summarize_router, prefix="/api")
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    """Health check endpoint."""
-    return {"status": "ok"}
+    """Health check endpoint with active LLM provider metadata."""
+    payload: dict[str, str] = {"status": "ok"}
+    try:
+        payload.update(get_active_llm_info())
+    except ValueError as exc:
+        payload["llm_config_error"] = str(exc)
+    return payload

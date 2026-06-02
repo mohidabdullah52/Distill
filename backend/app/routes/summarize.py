@@ -39,7 +39,12 @@ async def summarize(req: SummarizeRequest) -> SummarizeResponse:
             detail="No chunks found for this session. Please re-upload files.",
         )
 
-    summary_text = generate_summary(retrieved_chunks, focus_prompt=req.focus_prompt)
+    try:
+        summary_text = generate_summary(
+            retrieved_chunks, focus_prompt=req.focus_prompt
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
     output_dir = settings.output_path()
     output_dir.mkdir(parents=True, exist_ok=True)

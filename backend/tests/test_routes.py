@@ -12,10 +12,34 @@ client = TestClient(app)
 
 
 def test_health_endpoint() -> None:
-    """Happy path: health check returns ok."""
-    response = client.get("/health")
+    """Happy path: health check returns ok with LLM metadata."""
+    with patch(
+        "app.main.get_active_llm_info",
+        return_value={"provider": "openai", "model": "gpt-4o-mini"},
+    ):
+        response = client.get("/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    data = response.json()
+    assert data["status"] == "ok"
+    assert data["provider"] == "openai"
+
+
+@patch(
+    "app.routes.summarize.generate_summary",
+    side_effect=ValueError("OPENAI_API_KEY is required"),
+)
+@patch(
+    "app.routes.summarize.retrieve_for_summary",
+    return_value=["chunk"],
+)
+def test_summarize_llm_config_error(mock_retrieve, mock_llm) -> None:
+    """Edge case: missing LLM credentials return 503."""
+    response = client.post(
+        "/api/summarize",
+        json={"session_id": "abc123", "focus_prompt": None},
+    )
+    assert response.status_code == 503
+    assert "OPENAI_API_KEY" in response.json()["detail"]
 
 
 def test_ingest_no_files() -> None:
@@ -50,12 +74,17 @@ def test_ingest_success(mock_extract, mock_chunk, mock_upsert) -> None:
 
 @patch("app.routes.summarize.markdown_to_pdf")
 @patch("app.routes.summarize.get_source_files", return_value=["report.pdf"])
-@patch("app.routes.summarize.generate_summary", return_value="## Executive Summary\n\nDone.")
+@patch(
+    "app.routes.summarize.generate_summary",
+    return_value="## Executive Summary\n\nDone.",
+)
 @patch(
     "app.routes.summarize.retrieve_for_summary",
     return_value=["chunk"],
 )
-def test_summarize_success(mock_retrieve, mock_llm, mock_sources, mock_pdf) -> None:
+def test_summarize_success(
+    mock_retrieve, mock_llm, mock_sources, mock_pdf
+) -> None:
     """Happy path: summarize returns download URL."""
     response = client.post(
         "/api/summarize",
