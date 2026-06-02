@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 
 from app.config import settings
 from app.models.schemas import SummarizeRequest, SummarizeResponse
-from app.services.embedder import get_source_files
+from app.services.embedder import delete_session, get_source_files
 from app.services.llm import generate_summary
 from app.services.pdf_generator import markdown_to_pdf
 from app.services.retriever import retrieve_for_summary
@@ -104,3 +104,19 @@ async def download_pdf(filename: str) -> FileResponse:
         media_type="application/pdf",
         filename=filename,
     )
+
+
+@router.post("/cleanup/{session_id}")
+async def cleanup_session(session_id: str) -> dict[str, str]:
+    """
+    Cleans up session collections and temporary files from backend storage.
+
+    Args:
+        session_id (str): Session identifier to purge.
+
+    Returns:
+        dict[str, str]: Success status payload.
+    """
+    delete_session(session_id)
+    return {"status": "success", "message": f"Session {session_id} cleaned up."}
+

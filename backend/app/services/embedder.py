@@ -8,6 +8,8 @@ import chromadb
 from chromadb.api import ClientAPI
 from chromadb.utils import embedding_functions
 
+import shutil
+
 from app.config import settings
 
 _client: ClientAPI | None = None
@@ -132,7 +134,7 @@ def get_source_files(session_id: str) -> List[str]:
 
 def delete_session(session_id: str) -> None:
     """
-    Removes a session collection from Chroma when cleanup is requested.
+    Removes session collection, uploaded files, and output PDF reports.
 
     Args:
         session_id (str): Session identifier to delete.
@@ -140,8 +142,26 @@ def delete_session(session_id: str) -> None:
     Returns:
         None
     """
+    # 1. Delete ChromaDB collection
     try:
         client = _get_client()
         client.delete_collection(_collection_name(session_id))
     except Exception:
         pass
+
+    # 2. Delete uploads folder
+    upload_dir = settings.upload_path() / session_id
+    if upload_dir.exists() and upload_dir.is_dir():
+        try:
+            shutil.rmtree(upload_dir)
+        except Exception:
+            pass
+
+    # 3. Delete output PDF
+    pdf_filename = f"summary_{session_id}.pdf"
+    pdf_path = settings.output_path() / pdf_filename
+    if pdf_path.exists() and pdf_path.is_file():
+        try:
+            pdf_path.unlink()
+        except Exception:
+            pass

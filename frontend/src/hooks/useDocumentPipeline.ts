@@ -192,11 +192,19 @@ export function useDocumentPipeline() {
     [state.files],
   )
 
-  const reset = useCallback(() => dispatch({ type: 'RESET' }), [])
+  const reset = useCallback(() => {
+    if (state.sessionId) {
+      client.post(`/cleanup/${state.sessionId}`).catch(() => {})
+    }
+    dispatch({ type: 'RESET' })
+  }, [state.sessionId])
 
   const dismissError = useCallback(() => {
+    if (state.sessionId) {
+      client.post(`/cleanup/${state.sessionId}`).catch(() => {})
+    }
     dispatch({ type: 'RESET' })
-  }, [])
+  }, [state.sessionId])
 
   return { state, STEPS, addFiles, removeFile, run, reset, dismissError }
 }

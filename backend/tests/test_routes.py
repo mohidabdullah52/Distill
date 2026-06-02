@@ -157,3 +157,15 @@ def test_ingest_path_traversal_prevention(mock_extract, mock_chunk, mock_upsert)
     data = response.json()
     assert data["files_processed"] == ["report.pdf"]
 
+
+@patch("app.routes.summarize.delete_session")
+def test_cleanup_session_route(mock_delete) -> None:
+    """
+    Verifies that POST /api/cleanup/{session_id} invokes delete_session and returns 200.
+    """
+    response = client.post("/api/cleanup/testsession123")
+    assert response.status_code == 200
+    assert response.json()["status"] == "success"
+    mock_delete.assert_called_once_with("testsession123")
+
+
