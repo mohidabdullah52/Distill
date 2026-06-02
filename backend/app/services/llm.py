@@ -105,7 +105,15 @@ def generate_summary(chunks: List[str], focus_prompt: str | None = None) -> str:
     config = resolve_llm_config()
     client = _get_client()
 
-    context = "\n\n---\n\n".join(chunks)
+    context_parts = []
+    current_chars = 0
+    for chunk in chunks:
+        if current_chars + len(chunk) > settings.max_context_chars:
+            break
+        context_parts.append(chunk)
+        current_chars += len(chunk)
+
+    context = "\n\n---\n\n".join(context_parts)
     user_content = f"Here are the relevant document excerpts:\n\n{context}"
     if focus_prompt:
         user_content += f"\n\nUser focus area: {focus_prompt}"

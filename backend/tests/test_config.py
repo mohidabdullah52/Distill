@@ -143,5 +143,6 @@ def test_settings_defaults() -> None:
     """
     cfg = Settings()
     assert cfg.llm_timeout == 120.0
+    assert cfg.max_context_chars == 100000
 
 

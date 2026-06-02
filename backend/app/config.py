@@ -52,6 +52,7 @@ class Settings(BaseSettings):
     max_file_size: int = 50 * 1024 * 1024
     embedding_model: str = "all-MiniLM-L6-v2"
     llm_timeout: float = 120.0
+    max_context_chars: int = 100000
     cors_origins: list[str] = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",

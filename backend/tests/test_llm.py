@@ -124,3 +124,40 @@ def test_get_active_llm_info(_mock_resolve) -> None:
 
     assert info == {"provider": "openai", "model": "gpt-4o-mini"}
     assert "api_key" not in info
+
+
+@patch("app.services.llm.validate_llm_config")
+@patch("app.services.llm.resolve_llm_config", return_value=_MOCK_LLM_CONFIG)
+@patch("app.services.llm._get_client")
+def test_generate_summary_context_truncation(
+    mock_get_client, _mock_resolve, _mock_validate
+) -> None:
+    """
+    Verifies that chunks exceeding the character budget are truncated.
+    """
+    mock_message = MagicMock()
+    mock_message.content = "Summary"
+
+    mock_choice = MagicMock()
+    mock_choice.message = mock_message
+
+    mock_response = MagicMock()
+    mock_response.choices = [mock_choice]
+
+    mock_client = MagicMock()
+    mock_client.chat.completions.create.return_value = mock_response
+    mock_get_client.return_value = mock_client
+
+    from app.config import settings
+    original_max = settings.max_context_chars
+    settings.max_context_chars = 10
+    try:
+        # "chunk1" is 6 chars, total 6.
+        # "chunk2" is 6 chars, which would make total 12. Since 12 > 10, it should truncate.
+        llm.generate_summary(["chunk1", "chunk2"])
+        call_kwargs = mock_client.chat.completions.create.call_args.kwargs
+        user_msg = call_kwargs["messages"][1]["content"]
+        assert "chunk1" in user_msg
+        assert "chunk2" not in user_msg
+    finally:
+        settings.max_context_chars = original_max
