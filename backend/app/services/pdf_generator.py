@@ -140,6 +140,7 @@ def markdown_to_pdf(summary_text: str, output_path: Path, source_files: list[str
         if line.startswith("## "):
             heading = line[3:].strip()
             heading = escape_xml(heading)
+            heading = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", heading)
             story.append(Paragraph(heading, styles["H2"]))
             story.append(
                 HRFlowable(
@@ -156,6 +157,7 @@ def markdown_to_pdf(summary_text: str, output_path: Path, source_files: list[str
             ):
                 bullet_text = lines[i][2:].strip()
                 bullet_text = escape_xml(bullet_text)
+                bullet_text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", bullet_text)
                 bullets.append(
                     ListItem(
                         Paragraph(bullet_text, styles["BulletText"]),

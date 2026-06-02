@@ -63,3 +63,20 @@ If x < y and y > z:
     assert output.exists()
     assert output.stat().st_size > 0
 
+
+def test_markdown_to_pdf_bullet_bolding(tmp_path: Path) -> None:
+    """
+    Verifies that markdown input with bold formatting inside headers and bullets
+    is correctly parsed and generates a valid PDF.
+    """
+    output = tmp_path / "bold_formatting_test.pdf"
+    summary = """## Executive **Summary**
+- This is **bold** text in bullet
+- Another **important** point
+"""
+    markdown_to_pdf(summary, output, ["report.pdf"])
+
+    assert output.exists()
+    assert output.stat().st_size > 0
+
+
