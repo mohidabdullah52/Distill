@@ -5,6 +5,20 @@ interface SummaryPreviewProps {
   text: string
 }
 
+function renderTextWithBold(textStr: string) {
+  const parts = textStr.split('**')
+  return parts.map((part, index) => {
+    if (index % 2 === 1) {
+      return (
+        <Box component="span" key={index} sx={{ fontWeight: 700, color: 'text.primary' }}>
+          {part}
+        </Box>
+      )
+    }
+    return part
+  })
+}
+
 /**
  * Renders a scrollable summary preview with simple markdown styling.
  *
@@ -44,7 +58,7 @@ export default function SummaryPreview({ text }: SummaryPreviewProps) {
                 mb: 0.5,
               }}
             >
-              {trimmed.slice(3)}
+              {renderTextWithBold(trimmed.slice(3))}
             </Typography>
           )
         }
@@ -59,14 +73,14 @@ export default function SummaryPreview({ text }: SummaryPreviewProps) {
               <Box component="span" sx={{ color: 'secondary.main' }}>
                 •
               </Box>
-              {trimmed.slice(2)}
+              {renderTextWithBold(trimmed.slice(2))}
             </Typography>
           )
         }
         if (!trimmed) return <Box key={i} sx={{ height: 8 }} />
         return (
           <Typography key={i} variant="body2" color="text.secondary" sx={{ py: 0.25 }}>
-            {trimmed}
+            {renderTextWithBold(trimmed)}
           </Typography>
         )
       })}
