@@ -1,7 +1,4 @@
-"""
-Handles multipart uploads and indexes parsed documents into ChromaDB.
-"""
-
+import asyncio
 import uuid
 from pathlib import Path
 
@@ -70,8 +67,8 @@ async def ingest_files(files: list[UploadFile] = File(...)) -> IngestResponse:
             f.write(content)
 
         try:
-            pages = extract_text(dest)
-            chunks = chunk_pages(pages)
+            pages = await asyncio.to_thread(extract_text, dest)
+            chunks = await asyncio.to_thread(chunk_pages, pages)
             all_chunks.extend(chunks)
             files_processed.append(safe_filename)
         except Exception as exc:

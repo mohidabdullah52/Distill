@@ -1,7 +1,4 @@
-"""
-Generates AI summaries and serves the resulting PDF files.
-"""
-
+import asyncio
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
@@ -64,7 +61,7 @@ async def summarize(req: SummarizeRequest) -> SummarizeResponse:
     except Exception:
         source_files = []
 
-    markdown_to_pdf(summary_text, pdf_path, source_files)
+    await asyncio.to_thread(markdown_to_pdf, summary_text, pdf_path, source_files)
 
     preview = summary_text[:500] + ("..." if len(summary_text) > 500 else "")
 
