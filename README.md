@@ -6,7 +6,7 @@ Upload PDFs and PowerPoint files and receive a compact, AI-generated summary PDF
 
 - **Backend:** FastAPI, ChromaDB, sentence-transformers
 - **LLM:** ChatGPT (OpenAI), Google Gemini, or local Ollama — configured via `.env`
-- **Frontend:** React, Vite, Material UI
+- **Frontend:** React, Vite, Material UI (modern dark UI with glassmorphism)
 
 ## Prerequisites
 
@@ -74,7 +74,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173, upload PDF/PPTX files, optionally set a focus area, and click **Generate Summary PDF**.
+Open http://localhost:5173 — the UI shows API/LLM status in the header, supports drag-and-drop upload, a live pipeline stepper, and an in-app summary preview before download.
 
 ## API
 
