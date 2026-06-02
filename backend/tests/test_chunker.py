@@ -42,3 +42,16 @@ def test_chunk_pages_overlap_validation() -> None:
     with pytest.raises(ValueError, match="chunk_overlap must be less than chunk_size"):
         chunk_pages([("report.pdf", 1, "test text")], chunk_size=10, chunk_overlap=10)
 
+
+def test_chunk_pages_smart_boundaries() -> None:
+    """
+    Verifies that chunk_pages splits on sentence or whitespace boundaries near the limit.
+    """
+    text = "This is a long sentence. Here is another sentence. And a third one."
+    chunks = chunk_pages([("report.pdf", 1, text)], chunk_size=30, chunk_overlap=5)
+    
+    assert len(chunks) >= 2
+    assert chunks[0]["text"] == "This is a long sentence."
+    assert "Here is another sentence." in chunks[1]["text"]
+
+
