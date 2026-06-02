@@ -107,7 +107,10 @@ export default function DropZone({ onFilesAdded, disabled }: DropZoneProps) {
         variant="outlined"
         size="medium"
         disabled={disabled}
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation()
+          inputRef.current?.click()
+        }}
         sx={{
           borderColor: alpha('#FFFFFF', 0.2),
           color: 'text.primary',
