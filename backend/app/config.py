@@ -49,6 +49,7 @@ class Settings(BaseSettings):
     chunk_overlap: int = 100
     top_k_chunks: int = 12
     max_file_size: int = 50 * 1024 * 1024
+    embedding_model: str = "all-MiniLM-L6-v2"
 
     @field_validator("llm_provider")
     @classmethod

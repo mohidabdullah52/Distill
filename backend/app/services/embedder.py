@@ -11,6 +11,7 @@ from chromadb.utils import embedding_functions
 from app.config import settings
 
 _client: ClientAPI | None = None
+_embedding_function = None
 
 
 def _get_client() -> ClientAPI:
@@ -48,9 +49,12 @@ def _get_embedding_function():
     Returns:
         SentenceTransformerEmbeddingFunction: Embedding function for upsert and query.
     """
-    return embedding_functions.SentenceTransformerEmbeddingFunction(
-        model_name="all-MiniLM-L6-v2",
-    )
+    global _embedding_function
+    if _embedding_function is None:
+        _embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(
+            model_name=settings.embedding_model,
+        )
+    return _embedding_function
 
 
 def upsert_chunks(session_id: str, chunks: List[Dict[str, Any]]) -> int:

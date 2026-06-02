@@ -18,8 +18,10 @@ def reset_embedder_client():
         None
     """
     embedder._client = None
+    embedder._embedding_function = None
     yield
     embedder._client = None
+    embedder._embedding_function = None
 
 
 def test_upsert_chunks_calls_collection() -> None:
@@ -65,3 +67,19 @@ def test_query_chunks_missing_session_raises() -> None:
     ):
         with pytest.raises(Exception, match="Collection not found"):
             embedder.query_chunks("missing", "query")
+
+
+def test_get_embedding_function_caching() -> None:
+    """
+    Verifies that _get_embedding_function caches the created embedding function
+    and returns the same instance across calls.
+    """
+    with patch("chromadb.utils.embedding_functions.SentenceTransformerEmbeddingFunction") as mock_st:
+        mock_st.return_value = MagicMock()
+        
+        ef1 = embedder._get_embedding_function()
+        ef2 = embedder._get_embedding_function()
+        
+        assert ef1 is ef2
+        mock_st.assert_called_once()
+
