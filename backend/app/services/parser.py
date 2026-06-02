@@ -62,16 +62,37 @@ def _extract_pptx(path: Path) -> List[PageTuple]:
     """
     from pptx import Presentation
 
+    def _extract_shape_text(shape, parts: List[str]) -> None:
+        # 1. Group shape (recurse first)
+        if hasattr(shape, "shapes"):
+            for sub_shape in shape.shapes:
+                _extract_shape_text(sub_shape, parts)
+            return
+
+        # 2. Table shape
+        if shape.has_table:
+            for row in shape.table.rows:
+                for cell in row.cells:
+                    if cell.text_frame:
+                        for para in cell.text_frame.paragraphs:
+                            line = " ".join(run.text for run in para.runs).strip()
+                            if line:
+                                parts.append(line)
+            return
+
+        # 3. Standard shape with text frame
+        if shape.has_text_frame:
+            for para in shape.text_frame.paragraphs:
+                line = " ".join(run.text for run in para.runs).strip()
+                if line:
+                    parts.append(line)
+
     prs = Presentation(str(path))
     results: List[PageTuple] = []
     for i, slide in enumerate(prs.slides, start=1):
         parts: List[str] = []
         for shape in slide.shapes:
-            if shape.has_text_frame:
-                for para in shape.text_frame.paragraphs:
-                    line = " ".join(run.text for run in para.runs).strip()
-                    if line:
-                        parts.append(line)
+            _extract_shape_text(shape, parts)
         text = "\n".join(parts).strip()
         if text:
             results.append((path.name, i, text))
