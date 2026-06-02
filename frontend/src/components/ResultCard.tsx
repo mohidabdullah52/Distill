@@ -5,6 +5,7 @@ import TaskAltIcon from '@mui/icons-material/TaskAlt'
 import { alpha } from '@mui/material/styles'
 import SummaryPreview from './SummaryPreview'
 import { glassCard } from '../theme'
+import client from '../api/client'
 
 interface ResultCardProps {
   downloadUrl: string | null
@@ -21,9 +22,14 @@ interface ResultCardProps {
  */
 export default function ResultCard({
   downloadUrl,
+  pdfFilename,
   summaryPreview,
   onReset,
 }: ResultCardProps) {
+  const downloadHref = pdfFilename
+    ? `${client.defaults.baseURL || ''}/download/${pdfFilename}`
+    : (downloadUrl || '#')
+
   return (
     <Paper
       className="animate-fade-up"
@@ -56,7 +62,7 @@ export default function ResultCard({
             Summary ready
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Your distilled report is available to download
+            Your distilled report {pdfFilename ? `(${pdfFilename})` : ''} is available to download
           </Typography>
         </Box>
       </Box>
@@ -79,10 +85,10 @@ export default function ResultCard({
           size="large"
           startIcon={<DownloadIcon />}
           component="a"
-          href={downloadUrl || '#'}
+          href={downloadHref}
           target="_blank"
           rel="noopener noreferrer"
-          disabled={!downloadUrl}
+          disabled={!downloadHref || downloadHref === '#'}
           sx={{ flex: { xs: '1 1 100%', sm: '0 1 auto' } }}
         >
           Download PDF
