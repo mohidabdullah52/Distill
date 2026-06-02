@@ -61,7 +61,11 @@ async def ingest_files(files: list[UploadFile] = File(...)) -> IngestResponse:
                 f"{settings.max_file_size // (1024 * 1024)}MB",
             )
 
-        dest = upload_dir / upload.filename
+        safe_filename = Path(upload.filename).name
+        if not safe_filename:
+            raise HTTPException(status_code=400, detail="Invalid filename")
+
+        dest = upload_dir / safe_filename
         with open(dest, "wb") as f:
             f.write(content)
 
@@ -69,11 +73,11 @@ async def ingest_files(files: list[UploadFile] = File(...)) -> IngestResponse:
             pages = extract_text(dest)
             chunks = chunk_pages(pages)
             all_chunks.extend(chunks)
-            files_processed.append(upload.filename)
+            files_processed.append(safe_filename)
         except Exception as exc:
             raise HTTPException(
                 status_code=422,
-                detail=f"Failed to parse {upload.filename}: {exc}",
+                detail=f"Failed to parse {safe_filename}: {exc}",
             ) from exc
 
     if not all_chunks:

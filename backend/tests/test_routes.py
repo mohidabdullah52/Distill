@@ -140,3 +140,20 @@ def test_summarize_success(
     data = response.json()
     assert data["download_url"].startswith("/api/download/")
     assert "summary_preview" in data
+
+
+@patch("app.routes.ingest.upsert_chunks", return_value=1)
+@patch("app.routes.ingest.chunk_pages", return_value=[{"id": "x", "text": "t", "metadata": {}}])
+@patch("app.routes.ingest.extract_text", return_value=[("report.pdf", 1, "text")])
+def test_ingest_path_traversal_prevention(mock_extract, mock_chunk, mock_upsert) -> None:
+    """
+    Verifies that ingest sanitizes file paths and prevents directory traversal.
+    """
+    response = client.post(
+        "/api/ingest",
+        files=[("files", ("../../report.pdf", BytesIO(b"%PDF"), "application/pdf"))],
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["files_processed"] == ["report.pdf"]
+
