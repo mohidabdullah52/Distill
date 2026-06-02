@@ -46,6 +46,22 @@ export default function SummaryPreview({ text }: SummaryPreviewProps) {
     >
       {lines.map((line, i) => {
         const trimmed = line.trim()
+        if (trimmed.startsWith('### ')) {
+          return (
+            <Typography
+              key={i}
+              variant="body2"
+              sx={{
+                color: 'primary.light',
+                fontWeight: 700,
+                mt: i > 0 ? 1 : 0,
+                mb: 0.5,
+              }}
+            >
+              {renderTextWithBold(trimmed.slice(4))}
+            </Typography>
+          )
+        }
         if (trimmed.startsWith('## ')) {
           return (
             <Typography
@@ -62,6 +78,22 @@ export default function SummaryPreview({ text }: SummaryPreviewProps) {
             </Typography>
           )
         }
+        if (trimmed.startsWith('# ')) {
+          return (
+            <Typography
+              key={i}
+              variant="subtitle1"
+              sx={{
+                color: 'primary.light',
+                fontWeight: 800,
+                mt: i > 0 ? 2 : 0,
+                mb: 0.5,
+              }}
+            >
+              {renderTextWithBold(trimmed.slice(2))}
+            </Typography>
+          )
+        }
         if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
           return (
             <Typography
@@ -74,6 +106,24 @@ export default function SummaryPreview({ text }: SummaryPreviewProps) {
                 •
               </Box>
               {renderTextWithBold(trimmed.slice(2))}
+            </Typography>
+          )
+        }
+        const numListMatch = trimmed.match(/^(\d+)\.\s+(.*)/)
+        if (numListMatch) {
+          const num = numListMatch[1]
+          const content = numListMatch[2]
+          return (
+            <Typography
+              key={i}
+              variant="body2"
+              color="text.secondary"
+              sx={{ pl: 1.5, py: 0.25, display: 'flex', gap: 1 }}
+            >
+              <Box component="span" sx={{ color: 'secondary.main', fontWeight: 600 }}>
+                {num}.
+              </Box>
+              {renderTextWithBold(content)}
             </Typography>
           )
         }

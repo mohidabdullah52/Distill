@@ -80,3 +80,21 @@ def test_markdown_to_pdf_bullet_bolding(tmp_path: Path) -> None:
     assert output.stat().st_size > 0
 
 
+def test_markdown_to_pdf_advanced_elements(tmp_path: Path) -> None:
+    """
+    Verifies that markdown input with H1, H3, and numbered lists is correctly parsed and generates a valid PDF.
+    """
+    output = tmp_path / "advanced_elements_test.pdf"
+    summary = """# Document Title (H1)
+## Section Title (H2)
+### Subsection (H3)
+1. First item in list
+2. Second item in list
+"""
+    markdown_to_pdf(summary, output, ["report.pdf"])
+
+    assert output.exists()
+    assert output.stat().st_size > 0
+
+
+

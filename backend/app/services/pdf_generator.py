@@ -56,12 +56,34 @@ def _build_styles():
     )
     styles.add(
         ParagraphStyle(
+            name="H1",
+            fontSize=16,
+            leading=22,
+            textColor=ACCENT_COLOR,
+            spaceBefore=18,
+            spaceAfter=8,
+            fontName="Helvetica-Bold",
+        )
+    )
+    styles.add(
+        ParagraphStyle(
             name="H2",
             fontSize=13,
             leading=18,
             textColor=ACCENT_COLOR,
             spaceBefore=16,
             spaceAfter=6,
+            fontName="Helvetica-Bold",
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="H3",
+            fontSize=11,
+            leading=16,
+            textColor=ACCENT_COLOR,
+            spaceBefore=14,
+            spaceAfter=4,
             fontName="Helvetica-Bold",
         )
     )
@@ -137,11 +159,37 @@ def markdown_to_pdf(summary_text: str, output_path: Path, source_files: list[str
     while i < len(lines):
         line = lines[i].rstrip()
 
-        if line.startswith("## "):
+        if line.startswith("### "):
+            heading = line[4:].strip()
+            heading = escape_xml(heading)
+            heading = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", heading)
+            story.append(Paragraph(heading, styles["H3"]))
+            story.append(
+                HRFlowable(
+                    width="100%",
+                    thickness=0.5,
+                    color=colors.lightgrey,
+                    spaceAfter=4,
+                )
+            )
+        elif line.startswith("## "):
             heading = line[3:].strip()
             heading = escape_xml(heading)
             heading = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", heading)
             story.append(Paragraph(heading, styles["H2"]))
+            story.append(
+                HRFlowable(
+                    width="100%",
+                    thickness=0.5,
+                    color=colors.lightgrey,
+                    spaceAfter=4,
+                )
+            )
+        elif line.startswith("# "):
+            heading = line[2:].strip()
+            heading = escape_xml(heading)
+            heading = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", heading)
+            story.append(Paragraph(heading, styles["H1"]))
             story.append(
                 HRFlowable(
                     width="100%",
@@ -168,6 +216,26 @@ def markdown_to_pdf(summary_text: str, output_path: Path, source_files: list[str
             story.append(
                 ListFlowable(
                     bullets, bulletType="bullet", start="•", leftIndent=20
+                )
+            )
+            continue
+        elif re.match(r"^\d+\.\s+", line):
+            numbered_items = []
+            while i < len(lines) and re.match(r"^\d+\.\s+", lines[i]):
+                match = re.match(r"^\d+\.\s+(.*)", lines[i])
+                item_text = match.group(1).strip()
+                item_text = escape_xml(item_text)
+                item_text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", item_text)
+                numbered_items.append(
+                    ListItem(
+                        Paragraph(item_text, styles["BulletText"]),
+                        bulletColor=ACCENT_COLOR,
+                    )
+                )
+                i += 1
+            story.append(
+                ListFlowable(
+                    numbered_items, bulletType="1", start=1, leftIndent=20
                 )
             )
             continue
