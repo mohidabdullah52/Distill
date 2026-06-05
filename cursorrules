@@ -1,0 +1,42 @@
+# Distill — Cursor AI Rules
+
+## Git Workflow
+
+- The only two long-lived branches are `master` and `develop`.
+- **Never touch `master` directly.** It is protected. All work flows through `develop`.
+- For every new feature or bug fix, create a branch off `develop` using this naming convention:
+  - New feature → `feature-short-description-here`
+  - Bug fix → `fix-short-description-here`
+  - Examples: `feature-file-preview-panel`, `fix-chunk-overlap-crash`
+- Branch names must be lowercase, hyphen-separated, no spaces, no special characters.
+
+## Feature Development Order
+
+1. Cut a new branch from `develop`
+2. Implement the feature
+3. Write unit tests for that feature in `pytest` (see Testing Rules below)
+4. Run all tests — every test must pass before proceeding
+5. Push the branch to remote
+6. Merge into `develop`
+7. Delete the feature branch after merging
+
+## Testing Rules
+
+- All tests live in `backend/tests/`
+- One test file per feature/module: `test_parser.py`, `test_chunker.py`, `test_embedder.py`, etc.
+- Use `pytest` only — no other test framework
+- Every new feature must have at least:
+  - One happy-path test (expected input → expected output)
+  - One edge-case test (empty input, bad file type, missing session, etc.)
+- Tests must not make real LLM calls — mock the LLM service using `unittest.mock`
+- Tests must not require a running ChromaDB instance — use in-memory or mocked clients
+- All tests must pass with `pytest backend/tests/` before merging
+
+## General Code Rules
+
+- Follow the existing file and folder structure defined in the project spec
+- After Each Feature update the Readme.md file
+- Do not introduce new dependencies without updating `requirements.txt`
+- Every function must have a docstring
+- Keep functions small and single-purpose — if a function does two things, split it
+- Never hardcode secrets, paths, or model names — use `config.py` and `.env`
